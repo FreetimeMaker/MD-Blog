@@ -28,7 +28,7 @@ mdxpress-blog-cnp/
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/FreetimeMaker/MD-Blog
-   cd MDX-Blog
+   cd MD-Blog
    ```
 
 2. **Install Dependencies**

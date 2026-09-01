@@ -1,4 +1,4 @@
-# ****About Me****
+# About Me
 
 - **I'm only one Person doing everything alone with the help of some contributors of course.**
 - **I'm from Switzerland.**

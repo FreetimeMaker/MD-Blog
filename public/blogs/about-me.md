@@ -1,4 +1,6 @@
-# ****Freetime Maker****
+# About Me
+
+# Freetime Maker
 📧 **[FreetimeMaker@proton.me](mailto:FreetimeMaker@proton.me)**
 📍 **Switzerland**
 
