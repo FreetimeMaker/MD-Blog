@@ -11,3 +11,7 @@
 - **It will be used make it easier for you to keep track of all my Work**
 
 - **I will add an new Blog every time something is new.**
+
+## ****Some Informations****
+
+> **Every Date is at my local time. For example if you're in New York City and I publish something on 09.09.2027 at 3 A. M. in Switzerland then for you it would be 08.09.2027 at 9 P. M.**
