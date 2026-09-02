@@ -28,7 +28,7 @@ export default function handler(req, res) {
         .join('\n');
 
     const content = `<h1>My Blogs</h1><ul>${listItems}</ul>`;
-    const html = template.replace(/{{title}}/g, '<strong>My Blogs</strong>').replace(/{{content}}/g, content);
+    const html = template.replace(/{{title}}/g, 'My Blogs').replace(/{{content}}/g, content);
 
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
