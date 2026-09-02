@@ -10,7 +10,8 @@ export default function handler(req, res) {
     const template = fs.readFileSync(templatePath, 'utf-8');
 
     const title = (md.match(/^# (.+)/) || [])[1] || 'Homepage';
-    const content = marked.parse(md);
+    const contentMarkdown = md.replace(/^# .*\n?/gm, '');
+    const content = marked.parse(contentMarkdown);
     const html = template.replace(/{{title}}/g, title).replace(/{{content}}/g, content);
 
     res.setHeader('Content-Type', 'text/html');

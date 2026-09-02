@@ -13,8 +13,9 @@ export default function handler(req, res) {
     }
 
     const data = fs.readFileSync(filePath, 'utf-8');
-    const content = marked.parse(data);
     const title = (data.match(/^# (.+)/) || [])[1] || slug;
+    const contentMarkdown = data.replace(/^# .*\n?/gm, '');
+    const content = marked.parse(contentMarkdown);
     const template = fs.readFileSync(templatePath, 'utf-8');
     const html = template.replace(/{{title}}/g, title).replace(/{{content}}/g, content);
 
