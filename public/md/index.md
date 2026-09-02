@@ -14,4 +14,4 @@
 
 ## ****Some Informations****
 
-> **Every Date is at my local time. For example if you're in New York City and I publish something on 09.09.2027 at 3 A. M. in Switzerland then for you it would be 08.09.2027 at 9 P. M.**
+> **Every Date is at my local time. For example if you're in New York City and I publish something on 09.09.2027 at 03.00 in Switzerland then for you it would be 08.09.2027 at 9 P. M. and 22:00 would be 4 P. M.**
