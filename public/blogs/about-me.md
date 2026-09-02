@@ -30,5 +30,3 @@
 **2026 – now**
 
 ---
-
-> ****Feel free to reach out for collaboration!****
