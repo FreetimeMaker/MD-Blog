@@ -4,6 +4,7 @@
     { "src": "/blog", "dest": "/api/blog.js" },
     { "src": "/blog/(.*)", "dest": "/api/blog/[slug].js" },
     { "src": "/", "dest": "/api/index.js" },
-    { "src": "/styles/(.*)", "dest": "/public/styles/$1" }
+    { "src": "/styles/(.*)", "dest": "/public/styles/$1" },
+    { "src": "/favicons/(.*)", "dest": "/public/favicons/$1" }
   ]
 }
