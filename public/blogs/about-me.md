@@ -1,6 +1,6 @@
 # About Me
 
-## Released on {{ now().strftime("%d.%m.%Y %H:%M") }}
+## ****Released on 01.09.2026****
 
 # Freetime Maker
 📧 **[FreetimeMaker@proton.me](mailto:FreetimeMaker@proton.me)**
