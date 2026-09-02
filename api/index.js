@@ -11,7 +11,7 @@ export default function handler(req, res) {
 
     const title = (md.match(/^# (.+)/) || [])[1] || 'Homepage';
     const content = marked.parse(md);
-    const html = template.replace(/{{title}}/g, title).replace(/{{content}}/g, content);
+    const html = template.replace(/{{title}}/g, `<strong>${title}</strong>`).replace(/{{content}}/g, content);
 
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
