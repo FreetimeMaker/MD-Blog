@@ -1,61 +1,92 @@
-# 🚀 MD Blog
+# MD-Blog
 
-**MD Blog** is a serverless-friendly version of the original [MDXpress Blog](https://github.com/eshan-singh78/MDXpress-Blog/), reworked to deploy seamlessly on platforms like **Vercel** using **Serverless Functions**.
+MD-Blog is a lightweight blog platform for publishing Markdown files as web pages. It is designed for simple personal blogs, app changelogs, project updates, and other content that should be easy to write and maintain.
 
-It’s a markdown-powered, minimal blogging platform that compiles content on-the-fly without any backend server, database, or complex setup.
+## Features
 
-## 📁 Project Structure
+- Render Markdown files as HTML with [Marked](https://marked.js.org/)
+- Automatically discover blog posts from `public/blogs`
+- Generate readable URLs from Markdown filenames
+- Reusable HTML templates for the homepage and blog posts
+- Light and dark theme toggle
+- Ready for deployment on Vercel
 
+## Project Structure
+
+```text
+api/
+	index.js           Homepage endpoint
+	blog.js            Blog index endpoint
+	blog/[slug].js     Individual blog post endpoint
+public/
+	blogs/             Markdown blog posts
+	md/index.md        Homepage content
+	views/             HTML templates
+	styles/            Stylesheets
+vercel.json          URL routing configuration
 ```
-mdxpress-blog-cnp/
-├── api/                 # Serverless function handlers
-│   ├── index.js         # Homepage rendering
-│   ├── blog.js          # Blog listing route
-│   └── blog/[slug].js   # Dynamic blog rendering
-├── public/
-│   ├── blogs/           # Markdown files for each blog post
-│   ├── styles/          # CSS with dark mode support
-│   └── views/           # HTML templates
-├── vercel.json          # Vercel routing and config
-├── package.json         # Metadata and dependencies
-└── README.md            # This file
+
+## Getting Started
+
+Install the project dependencies:
+
+```bash
+npm install
 ```
 
----
+The available npm scripts are:
 
-## 🧪 How to Run Locally
+```bash
+npm run dev
+npm start
+```
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/FreetimeMaker/MD-Blog
-   cd MD-Blog
-   ```
+Both scripts currently start `server.js`. For local execution, make sure a compatible `server.js` is present or use the Vercel development environment for the API routes.
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+## Adding a Blog Post
 
-3. **Run Locally with Vercel**
-   ```bash
-   vercel dev
-   ```
+1. Create a new Markdown file in `public/blogs`.
+2. Use a filename that will work as a URL slug, for example `my-first-post.md`.
+3. Add a level-one heading. It becomes the post title.
 
-4. **Visit the App**
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+Example:
 
----
+```markdown
+# My First Post
 
-## 📌 How It Works on Vercel
+This is the content of my first blog post.
+```
 
-- All backend logic is handled via Serverless Functions in `/api`.
-- Static assets (styles, markdown files) are served from `/public`.
-- HTML templates are combined with rendered Markdown and returned as HTML.
+The post will be available at:
 
----
+```text
+/blog/my-first-post
+```
 
-## 🙋‍♂️ About the Creator
+Posts without a level-one heading use a title generated from their filename.
 
-Crafted by [Eshan Singh](mailto:eshan.singh.04.dev@gmail.com), a full-stack developer & cybersecurity enthusiast exploring the balance of performance and simplicity in web apps.
+## Routes
 
----
+| URL | Description |
+| --- | --- |
+| `/` | Renders the homepage from `public/md/index.md` |
+| `/blog` | Lists all Markdown files in `public/blogs` |
+| `/blog/<slug>` | Renders one blog post |
+
+## Deployment
+
+This project includes a `vercel.json` file with the required routes for Vercel. To deploy:
+
+1. Import the repository into Vercel.
+2. Keep the project root as the repository root.
+3. Deploy without adding a build command.
+
+After deployment, the homepage and blog routes will be available through the assigned Vercel domain.
+
+## Author
+
+Created and maintained by [Freetime Maker](https://github.com/FreetimeMaker).
+
+## License
+
+This project is licensed under the GPL-3.0 License. See [LICENSE.txt](LICENSE.txt) for details.
