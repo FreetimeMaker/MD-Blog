@@ -1,6 +1,6 @@
 # F-Droid Repository and GeoWeather
 
-## ****Released on 06.09.2026 20:09 (08:09 PM)****
+## ****Released on 06.09.2026 20:23 (08:23 PM)****
 
 # ****[F-Droid Repository](https://fdroid.free-time.me)****
 
@@ -16,6 +16,10 @@
 
 - **If everything goes great the new Update will come today or the next week.**
 
-## ****Will this happen with other Apps as well?****
+# ****Will this happen with other Apps as well?****
 
 **Yes, I'm planning on doing it for other Apps as well, so be sure to check every day if there is something new.**
+
+## ****Will iOS and MacOS come too?****
+
+**I don't know yet because I don't have a Macbook or iMac, so that's why there isn't gonna come iOS and MacOS support from the beginning.**
