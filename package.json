@@ -3,7 +3,7 @@
     "type": "git",
     "url": "git+https://github.com/FreetimeMaker/MD-Blog.git"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "name": "md-blog",
   "version": "1.0.0",
   "description": "Lightweight Blog Platform for Automatic Markdown Rendering",
