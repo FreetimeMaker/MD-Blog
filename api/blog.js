@@ -41,23 +41,45 @@ export default function handler(req, res) {
     // Alle verfügbaren Kategorien sammeln (Unique)
     const allCategories = [...new Set(allPosts.flatMap(post => post.categories))].sort();
 
+    // Aktive Filter parsen (Array von Kategorien)
+    const activeFilters = category
+        ? category.split(',').map(c => c.trim()).filter(Boolean)
+        : [];
+
     // Sortieren: Neueste zuerst
     allPosts.sort((a, b) => b.date - a.date);
 
-    // Filtern nach Kategorie, falls ausgewählt
+    // Filtern nach Kategorien (AND-Logik: Post muss ALLE aktiven Kategorien haben)
+    // Wenn du OR-Logik willst (mindestens eine), ändere .every in .some
     let filteredPosts = allPosts;
-    if (category) {
+    if (activeFilters.length > 0) {
         filteredPosts = allPosts.filter(post =>
-            post.categories.some(cat => cat.toLowerCase() === category.toLowerCase())
+            activeFilters.every(f =>
+                post.categories.some(cat => cat.toLowerCase() === f.toLowerCase())
+            )
         );
     }
 
     const categoryCloud = allCategories.length > 0
         ? `<div class="categories-container" style="margin-bottom: 30px;">
-             <strong>Filter by:</strong> ${allCategories.map(cat =>
-                `<a href="/blog?category=${encodeURIComponent(cat)}" class="category-tag ${category && category.toLowerCase() === cat.toLowerCase() ? 'active' : ''}">${cat}</a>`
-             ).join('')}
-             ${category ? `<a href="/blog" style="margin-left: 10px; font-size: 0.8rem;">Clear</a>` : ''}
+             <strong>Filter by:</strong> ${allCategories.map(cat => {
+                const isActive = activeFilters.some(f => f.toLowerCase() === cat.toLowerCase());
+
+                // URL für Toggle-Effekt bauen
+                let newFilters;
+                if (isActive) {
+                    newFilters = activeFilters.filter(f => f.toLowerCase() !== cat.toLowerCase());
+                } else {
+                    newFilters = [...activeFilters, cat];
+                }
+
+                const href = newFilters.length > 0
+                    ? `/blog?category=${encodeURIComponent(newFilters.join(','))}`
+                    : '/blog';
+
+                return `<a href="${href}" class="category-tag ${isActive ? 'active' : ''}">${cat}${isActive ? ' ✕' : ''}</a>`;
+             }).join('')}
+             ${activeFilters.length > 0 ? `<a href="/blog" style="margin-left: 10px; font-size: 0.8rem;">Clear All</a>` : ''}
            </div>`
         : '';
 
@@ -72,11 +94,15 @@ export default function handler(req, res) {
 
     let content = categoryCloud + `<ul>${listItems}</ul>`;
 
-    if (category && filteredPosts.length === 0) {
-        content = categoryCloud + `<p>No posts found in this category.</p>`;
+    if (activeFilters.length > 0 && filteredPosts.length === 0) {
+        content = categoryCloud + `<p>No posts found matching all selected categories: <strong>${activeFilters.join(', ')}</strong></p>`;
     }
 
-    const html = template.replace(/{{title}}/g, category ? `Blogs: ${category}` : 'My Blogs').replace(/{{content}}/g, content);
+    const titleText = activeFilters.length > 0
+        ? `My Blogs: ${activeFilters.join(' + ')}`
+        : 'My Blogs';
+
+    const html = template.replace(/{{title}}/g, titleText).replace(/{{content}}/g, content);
 
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
