@@ -2,21 +2,21 @@
 
 ## ****Released on 03.09.2026 15:48 (03:48 PM)****
 
-# Freetime Maker
+## Freetime Maker
 📧 **[FreetimeMaker@proton.me](mailto:FreetimeMaker@proton.me)**
 📍 **Switzerland**
 
 ---
 
-## 👋 ****About Me****
+### 👋 ****About Me****
 
 **Hi, I'm Freetime Maker. Only one Person doing everything alone with the help of some contributors of course.**
 
 ---
 
-## 🧠 ****Skills****
+### 🧠 ****Skills****
 
-### ****Technical**** 
+#### ****Technical**** 
 
 - ****Backend:**** **Node.js, Express, Supabase**
 
@@ -24,7 +24,7 @@
 
 ---
 
-## 🎓 ****Education****
+### 🎓 ****Education****
 
 ****TBZ (Technische Berufsschule Zürich)****
 **2026 – now**
