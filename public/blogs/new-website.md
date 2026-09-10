@@ -1,7 +1,7 @@
 # New Website
 
 ## ****Released on 03.09.2026 at 15:45 (03:45 PM)****
-## **Categories: Info, Websites**
+## **Categories: Websites**
 
 ## ****There is a new Website Available****
 

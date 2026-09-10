@@ -1,7 +1,6 @@
 # About Me
 
 ## ****Released on 03.09.2026 15:48 (03:48 PM)****
-## ****Categories: Info****
 
 ## Freetime Maker
 📧 **[FreetimeMaker@proton.me](mailto:FreetimeMaker@proton.me)**
