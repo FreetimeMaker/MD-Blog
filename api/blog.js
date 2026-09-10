@@ -12,19 +12,33 @@ export default function handler(req, res) {
 
     const files = fs.readdirSync(blogDir);
 
-    const listItems = files
+    const blogPosts = files
         .filter(f => f.endsWith('.md'))
         .map(f => {
             const slug = f.replace('.md', '');
             const filePath = path.join(blogDir, f);
             const data = fs.readFileSync(filePath, 'utf-8');
 
+            // Datum extrahieren: Released on DD.MM.YYYY [at] HH:mm
+            const dateMatch = data.match(/Released on\s+(\d{2})\.(\d{2})\.(\d{4})(?:\s+at)?\s+(\d{2}):(\d{2})/i);
+            let date = new Date(0);
+            if (dateMatch) {
+                const [_, day, month, year, hour, minute] = dateMatch;
+                date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+            }
+
             // Titel aus Markdown holen
             const title = (data.match(/^# (.+)/) || [])[1] 
                           || slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
 
-            return `<li><a href="/api/blog/${slug}">${title}</a></li>`;
-        })
+            return { slug, title, date };
+        });
+
+    // Sortieren: Neueste zuerst
+    blogPosts.sort((a, b) => b.date - a.date);
+
+    const listItems = blogPosts
+        .map(post => `<li><a href="/api/blog/${post.slug}">${post.title}</a></li>`)
         .join('\n');
 
     const content = `<ul>${listItems}</ul>`;
