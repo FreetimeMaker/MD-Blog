@@ -1,6 +1,7 @@
 # F-Droid Repository and GeoWeather
 
 ## ****Released on 06.09.2026 20:23 (08:23 PM)****
+## **Categories: Info, F-Droid, GeoWeather**
 
 ## ****[F-Droid Repository](https://fdroid.free-time.me)****
 

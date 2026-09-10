@@ -14,10 +14,27 @@ export default function handler(req, res) {
 
     const data = fs.readFileSync(filePath, 'utf-8');
     const title = (data.match(/^# (.+)/) || [])[1] || slug;
-    const contentMarkdown = data.replace(/^# .*\n?/gm, '');
+
+    // Kategorien extrahieren
+    const categoryMatch = data.match(/Categories:\s*(.+)/i);
+    const categories = categoryMatch
+        ? categoryMatch[1].split(',').map(c => c.replace(/\*/g, '').trim())
+        : [];
+
+    // Kategorien aus dem Body entfernen, um Dopplungen zu vermeiden
+    let contentMarkdown = data.replace(/^# .*\n?/gm, '');
+    contentMarkdown = contentMarkdown.replace(/.*Categories:.*\n?/gi, '');
+
     const content = marked.parse(contentMarkdown);
     const template = fs.readFileSync(templatePath, 'utf-8');
-    const html = template.replace(/{{title}}/g, title).replace(/{{content}}/g, content);
+
+    const catHtml = categories.length > 0
+        ? `<div class="categories-container">${categories.map(c => `<a href="/blog?category=${encodeURIComponent(c)}" class="category-tag">${c}</a>`).join('')}</div>`
+        : '';
+
+    const html = template
+        .replace(/{{title}}/g, title)
+        .replace(/{{content}}/g, catHtml + content);
 
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
