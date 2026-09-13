@@ -1,7 +1,7 @@
 # Luma Store
 
 ## **Released on 13.09.2026 at 14:40 (02:40PM)**
-## **Categories: Releases, Luma Store, Website, Apps**
+## **Categories: Releases, Luma Store, Websites, Apps**
 
 ## ****Luma Store****
 
