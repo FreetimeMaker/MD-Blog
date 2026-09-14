@@ -1,6 +1,6 @@
 # New Website
 
-## ****Released on 03.09.2026 at 15:45 (03:45 PM)****
+## ****Released on <t:1788443100:F> (<t:1788443100:R>)****
 ## **Categories: Websites**
 
 ## ****There is a new Website Available****
