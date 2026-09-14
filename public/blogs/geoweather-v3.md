@@ -1,6 +1,6 @@
 # GeoWeather V3
 
-## **Released on 09.09.2026 at 17:12 (05:12PM)**
+## **Released on <t:1788966720:F> (<t:1788966720:R>)**
 ## **Categories: Releases, GeoWeather, Apps**
 
 ## ****GeoWeather V3****
