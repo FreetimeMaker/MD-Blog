@@ -2,6 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { marked } from 'marked';
 
+function replaceDiscordTimestamps(markdown) {
+    return markdown.replace(/<t:(\d+)(?::([tTdDfFR]))?>/g, (_, timestamp, style = 'f') => {
+        return `<time class="discord-timestamp" data-timestamp="${timestamp}" data-style="${style}"><t:${timestamp}:${style}></time>`;
+    });
+}
+
 export default function handler(req, res) {
     const { slug } = req.query;
     const filePath = path.join(process.cwd(), 'public', 'blogs', `${slug}.md`);
@@ -24,6 +30,7 @@ export default function handler(req, res) {
     // Kategorien aus dem Body entfernen, um Dopplungen zu vermeiden
     let contentMarkdown = data.replace(/^# .*\n?/gm, '');
     contentMarkdown = contentMarkdown.replace(/.*Categories:.*\n?/gi, '');
+    contentMarkdown = replaceDiscordTimestamps(contentMarkdown);
 
     const content = marked.parse(contentMarkdown);
     const template = fs.readFileSync(templatePath, 'utf-8');
