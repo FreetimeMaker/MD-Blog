@@ -20,11 +20,20 @@ export default function handler(req, res) {
             const filePath = path.join(blogDir, f);
             const data = fs.readFileSync(filePath, 'utf-8');
 
-            const dateMatch = data.match(/Released on\s+(\d{2})\.(\d{2})\.(\d{4})(?:\s+at)?\s+(\d{2}):(\d{2})/i);
-            let date = new Date(0);
-            if (dateMatch) {
-                const [_, day, month, year, hour, minute] = dateMatch;
-                date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+            // Primär den neuen Discord-ähnlichen Unix-Timestamp verwenden.
+            // Beispiel: Released on <t:1789303200:F> (<t:1789303200:R>)
+            const timestampMatch = data.match(/Released on[\s\S]*?<t:(\d+)(?::[tTdDfFR])?>/i);
+            let releaseTimestamp = 0;
+
+            if (timestampMatch) {
+                releaseTimestamp = Number(timestampMatch[1]);
+            } else {
+                // Fallback für ältere Posts, die noch das alte Datumsformat verwenden.
+                const dateMatch = data.match(/Released on\s+(\d{2})\.(\d{2})\.(\d{4})(?:\s+at)?\s+(\d{2}):(\d{2})/i);
+                if (dateMatch) {
+                    const [_, day, month, year, hour, minute] = dateMatch;
+                    releaseTimestamp = Math.floor(new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime() / 1000);
+                }
             }
 
             const categoryMatch = data.match(/Categories:\s*(.+)/i);
@@ -35,7 +44,7 @@ export default function handler(req, res) {
             const title = (data.match(/^# (.+)/) || [])[1]
                           || slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
 
-            return { slug, title, date, categories };
+            return { slug, title, releaseTimestamp, categories };
         });
 
     // Alle verfügbaren Kategorien sammeln (Unique)
@@ -46,11 +55,11 @@ export default function handler(req, res) {
         ? category.split(',').map(c => c.trim()).filter(Boolean)
         : [];
 
-    // Sortieren: Neueste zuerst
-    allPosts.sort((a, b) => b.date - a.date);
+    // Sortieren: neuester Release zuerst.
+    // Posts ohne erkannten Release-Zeitstempel landen automatisch am Ende.
+    allPosts.sort((a, b) => b.releaseTimestamp - a.releaseTimestamp);
 
     // Filtern nach Kategorien (AND-Logik: Post muss ALLE aktiven Kategorien haben)
-    // Wenn du OR-Logik willst (mindestens eine), ändere .every in .some
     let filteredPosts = allPosts;
     if (activeFilters.length > 0) {
         filteredPosts = allPosts.filter(post =>
