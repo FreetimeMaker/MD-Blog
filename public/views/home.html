@@ -22,7 +22,7 @@
     {{content}}
   </div>
 
-  <footer>Powered by <strong>mdxpress</strong> &copy;  2026 FreetimeMaker</footer>
+  <footer>Powered by <strong>mdxpress</strong> &copy; 2026 FreetimeMaker</footer>
 
   <script>
     if (localStorage.getItem('theme') === 'dark') {
@@ -34,6 +34,64 @@
       const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
       localStorage.setItem('theme', theme);
     }
+
+    function formatRelativeTime(date, locale) {
+      const diffSeconds = Math.round((date.getTime() - Date.now()) / 1000);
+      const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+
+      if (Math.abs(diffSeconds) < 60) return rtf.format(diffSeconds, 'second');
+      const minutes = Math.round(diffSeconds / 60);
+      if (Math.abs(minutes) < 60) return rtf.format(minutes, 'minute');
+      const hours = Math.round(minutes / 60);
+      if (Math.abs(hours) < 24) return rtf.format(hours, 'hour');
+      const days = Math.round(hours / 24);
+      if (Math.abs(days) < 30) return rtf.format(days, 'day');
+      const months = Math.round(days / 30);
+      if (Math.abs(months) < 12) return rtf.format(months, 'month');
+      const years = Math.round(days / 365);
+      return rtf.format(years, 'year');
+    }
+
+    function updateTimestamps() {
+      const locale = navigator.language || 'en';
+
+      document.querySelectorAll('.discord-timestamp').forEach(element => {
+        const date = new Date(Number(element.dataset.timestamp) * 1000);
+        const style = element.dataset.style || 'f';
+        let value;
+
+        switch (style) {
+          case 't':
+            value = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+            break;
+          case 'T':
+            value = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            break;
+          case 'd':
+            value = date.toLocaleDateString(locale, { year: 'numeric', month: '2-digit', day: '2-digit' });
+            break;
+          case 'D':
+            value = date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+            break;
+          case 'F':
+            value = date.toLocaleString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            break;
+          case 'R':
+            value = formatRelativeTime(date, locale);
+            break;
+          case 'f':
+          default:
+            value = date.toLocaleString(locale, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        element.textContent = value;
+        element.dateTime = date.toISOString();
+        element.title = date.toLocaleString(locale);
+      });
+    }
+
+    updateTimestamps();
+    setInterval(updateTimestamps, 30000);
   </script>
 </body>
 </html>
