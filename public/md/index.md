@@ -1,6 +1,6 @@
 # About Me
 
-## ****Last Updated on <t:1788258000:f> (<t:1788258000:R>)****
+## ****Last Updated on 01.09.2026 at 12:20 (12:20 PM)****
 
 ## ****About Me****
 
