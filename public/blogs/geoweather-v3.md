@@ -5,7 +5,7 @@
 
 ## ****GeoWeather V3****
 
-### **What's new in GeoWeather V3?**
+### ****What's new in GeoWeather V3?****
 
 - **Migrated to Kotlin Multiplatform (KMP)**
 
