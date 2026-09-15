@@ -1,118 +1,79 @@
 import fs from 'fs';
 import path from 'path';
 
-export const config = {
-  runtime: 'nodejs'
-};
+const API_BASE = process.env.ALL_API_URL || 'https://api.free-time.me/v2';
 
-export default function handler(req, res) {
+export const config = { runtime: 'nodejs' };
+
+export default async function handler(req, res) {
     const { category } = req.query;
-    const blogDir = path.join(process.cwd(), 'public', 'blogs');
     const templatePath = path.join(process.cwd(), 'public', 'views', 'blog.html');
     const template = fs.readFileSync(templatePath, 'utf-8');
 
-    const files = fs.readdirSync(blogDir);
+    try {
+        const [postsResponse, categoriesResponse] = await Promise.all([
+            fetch(`${API_BASE}/blog/posts`),
+            fetch(`${API_BASE}/blog/categories`)
+        ]);
 
-    const allPosts = files
-        .filter(f => f.endsWith('.md'))
-        .map(f => {
-            const slug = f.replace('.md', '');
-            const filePath = path.join(blogDir, f);
-            const data = fs.readFileSync(filePath, 'utf-8');
+        if (!postsResponse.ok || !categoriesResponse.ok) {
+            throw new Error(`Blog API returned ${postsResponse.status}/${categoriesResponse.status}`);
+        }
 
-            // Primär den neuen Discord-ähnlichen Unix-Timestamp verwenden.
-            // Beispiel: Released on <t:1789303200:F> (<t:1789303200:R>)
-            const timestampMatch = data.match(/Released on[\s\S]*?<t:(\d+)(?::[tTdDfFR])?>/i);
-            let releaseTimestamp = 0;
+        const { posts: allPosts = [] } = await postsResponse.json();
+        const { categories: allCategories = [] } = await categoriesResponse.json();
 
-            if (timestampMatch) {
-                releaseTimestamp = Number(timestampMatch[1]);
-            } else {
-                // Fallback für ältere Posts, die noch das alte Datumsformat verwenden.
-                const dateMatch = data.match(/Released on\s+(\d{2})\.(\d{2})\.(\d{4})(?:\s+at)?\s+(\d{2}):(\d{2})/i);
-                if (dateMatch) {
-                    const [_, day, month, year, hour, minute] = dateMatch;
-                    releaseTimestamp = Math.floor(new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime() / 1000);
-                }
-            }
+        const activeFilters = category
+            ? category.split(',').map(c => c.trim()).filter(Boolean)
+            : [];
 
-            const categoryMatch = data.match(/Categories:\s*(.+)/i);
-            const categories = categoryMatch
-                ? categoryMatch[1].split(',').map(c => c.replace(/\*/g, '').trim())
-                : [];
+        const filteredPosts = activeFilters.length > 0
+            ? allPosts.filter(post => activeFilters.every(filter =>
+                post.categories.some(cat => cat.toLowerCase() === filter.toLowerCase())
+            ))
+            : allPosts;
 
-            const title = (data.match(/^# (.+)/) || [])[1]
-                          || slug.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+        const categoryCloud = allCategories.length > 0
+            ? `<div class="categories-container" style="margin-bottom: 30px;">
+                 <strong>Filter by:</strong> ${allCategories.map(cat => {
+                    const isActive = activeFilters.some(f => f.toLowerCase() === cat.toLowerCase());
+                    const newFilters = isActive
+                        ? activeFilters.filter(f => f.toLowerCase() !== cat.toLowerCase())
+                        : [...activeFilters, cat];
+                    const href = newFilters.length > 0
+                        ? `/blog?category=${encodeURIComponent(newFilters.join(','))}`
+                        : '/blog';
+                    return `<a href="${href}" class="category-tag ${isActive ? 'active' : ''}">${cat}${isActive ? ' ✕' : ''}</a>`;
+                 }).join('')}
+                 ${activeFilters.length > 0 ? `<a href="/blog" style="margin-left: 10px; font-size: 0.8rem;">Clear All</a>` : ''}
+               </div>`
+            : '';
 
-            return { slug, title, releaseTimestamp, categories };
-        });
-
-    // Alle verfügbaren Kategorien sammeln (Unique)
-    const allCategories = [...new Set(allPosts.flatMap(post => post.categories))].sort();
-
-    // Aktive Filter parsen (Array von Kategorien)
-    const activeFilters = category
-        ? category.split(',').map(c => c.trim()).filter(Boolean)
-        : [];
-
-    // Sortieren: neuester Release zuerst.
-    // Posts ohne erkannten Release-Zeitstempel landen automatisch am Ende.
-    allPosts.sort((a, b) => b.releaseTimestamp - a.releaseTimestamp);
-
-    // Filtern nach Kategorien (AND-Logik: Post muss ALLE aktiven Kategorien haben)
-    let filteredPosts = allPosts;
-    if (activeFilters.length > 0) {
-        filteredPosts = allPosts.filter(post =>
-            activeFilters.every(f =>
-                post.categories.some(cat => cat.toLowerCase() === f.toLowerCase())
-            )
-        );
-    }
-
-    const categoryCloud = allCategories.length > 0
-        ? `<div class="categories-container" style="margin-bottom: 30px;">
-             <strong>Filter by:</strong> ${allCategories.map(cat => {
-                const isActive = activeFilters.some(f => f.toLowerCase() === cat.toLowerCase());
-
-                // URL für Toggle-Effekt bauen
-                let newFilters;
-                if (isActive) {
-                    newFilters = activeFilters.filter(f => f.toLowerCase() !== cat.toLowerCase());
-                } else {
-                    newFilters = [...activeFilters, cat];
-                }
-
-                const href = newFilters.length > 0
-                    ? `/blog?category=${encodeURIComponent(newFilters.join(','))}`
-                    : '/blog';
-
-                return `<a href="${href}" class="category-tag ${isActive ? 'active' : ''}">${cat}${isActive ? ' ✕' : ''}</a>`;
-             }).join('')}
-             ${activeFilters.length > 0 ? `<a href="/blog" style="margin-left: 10px; font-size: 0.8rem;">Clear All</a>` : ''}
-           </div>`
-        : '';
-
-    const listItems = filteredPosts
-        .map(post => {
+        const listItems = filteredPosts.map(post => {
             const catHtml = post.categories.length > 0
                 ? ` <span class="categories">(${post.categories.map(cat => `<a href="/blog?category=${encodeURIComponent(cat)}">${cat}</a>`).join(', ')})</span>`
                 : '';
             return `<li><a href="/api/blog/${post.slug}">${post.title}</a>${catHtml}</li>`;
-        })
-        .join('\n');
+        }).join('\n');
 
-    let content = categoryCloud + `<ul>${listItems}</ul>`;
+        let content = categoryCloud + `<ul>${listItems}</ul>`;
+        if (activeFilters.length > 0 && filteredPosts.length === 0) {
+            content = categoryCloud + `<p>No posts found matching all selected categories: <strong>${activeFilters.join(', ')}</strong></p>`;
+        }
 
-    if (activeFilters.length > 0 && filteredPosts.length === 0) {
-        content = categoryCloud + `<p>No posts found matching all selected categories: <strong>${activeFilters.join(', ')}</strong></p>`;
+        const titleText = activeFilters.length > 0
+            ? `My Blogs: ${activeFilters.join(' + ')}`
+            : 'My Blogs';
+
+        const html = template.replace(/{{title}}/g, titleText).replace(/{{content}}/g, content);
+        res.setHeader('Content-Type', 'text/html');
+        res.status(200).send(html);
+    } catch (error) {
+        console.error('[blog] API error:', error);
+        const html = template
+            .replace(/{{title}}/g, 'My Blogs')
+            .replace(/{{content}}/g, '<p>Blog posts are temporarily unavailable. Please try again later.</p>');
+        res.setHeader('Content-Type', 'text/html');
+        res.status(503).send(html);
     }
-
-    const titleText = activeFilters.length > 0
-        ? `My Blogs: ${activeFilters.join(' + ')}`
-        : 'My Blogs';
-
-    const html = template.replace(/{{title}}/g, titleText).replace(/{{content}}/g, content);
-
-    res.setHeader('Content-Type', 'text/html');
-    res.status(200).send(html);
 }
