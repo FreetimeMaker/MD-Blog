@@ -5,6 +5,6 @@
 
 ## ****Luma Store New****
 
-### ****Is Luma Store coming to more Platforms?****
+### ****Is Luma Store cming to more Platforms?****
 
 **Yes, Luma Store will come to Linux and Windows.**
