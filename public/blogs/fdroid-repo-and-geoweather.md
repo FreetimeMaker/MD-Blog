@@ -1,7 +1,7 @@
 # F-Droid Repository and GeoWeather
 
 ## ****Released on <t:1788718980:F> (<t:1788718980:R>)****
-## **Categories: F-Droid, GeoWeather, Apps**
+## **Categories: F-Droid, GeoWeather, Apps, Android**
 
 ## ****[F-Droid Repository](https://fdroid.free-time.me)****
 

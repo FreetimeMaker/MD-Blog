@@ -1,7 +1,7 @@
 # Luma Store
 
 ## **Released on <t:1789303200:F> (<t:1789303200:R>)**
-## **Categories: Releases, Luma Store, Websites, Apps**
+## **Categories: Releases, Luma Store, Websites, Apps, Android, Linux, Windows**
 
 ## ****Luma Store****
 

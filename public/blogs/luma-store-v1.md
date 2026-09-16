@@ -1,7 +1,7 @@
 # Luma Store V1
 
 ## **Released on <t:1789477245:F> (<t:1789477245:R>)**
-## **Categories: Releases, Luma Store, Apps**
+## **Categories: Releases, Luma Store, Apps, Android**
 
 ## ****Luma Store V1****
 
