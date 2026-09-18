@@ -1,11 +1,11 @@
-# GeoWeather V3
+# GeoWeather V3.0.0
 
 ## **Released on <t:1788966720:F> (<t:1788966720:R>)**
 ## **Categories: Releases, GeoWeather, Apps, Android**
 
-## ****GeoWeather V3****
+## ****GeoWeather V3.0.0****
 
-### ****What's new in GeoWeather V3?****
+### ****What's new in GeoWeather V3.0.0?****
 
 - **Migrated to Kotlin Multiplatform (KMP)**
 
