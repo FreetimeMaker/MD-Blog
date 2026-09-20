@@ -7,7 +7,7 @@
 
 ### ****Why so many Releases?****
 
-- **There were so many Releases today and the last few days to make the Apps better and give them new Features.**
+**There were so many Releases today and the last few days to make the Apps better and give them new Features.**
 
 ### ****GeoWeather****
 
