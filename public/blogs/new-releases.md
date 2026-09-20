@@ -1,4 +1,4 @@
-# Releases
+# New Releases
 
 ## **Released on <t:1789929600:F> (<t:1789929600:R>)**
 ## **Categories: Releases, GeoWeather, Luma Store, Apps, Android**
@@ -7,7 +7,7 @@
 
 ### ****Why so many Releases?****
 
-- **There were so many Releases today to make the Apps better and give them new Features.**
+**There were so many Releases today to make the Apps better and give them new Features.**
 
 ### ****GeoWeather****
 
