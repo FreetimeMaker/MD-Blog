@@ -1,6 +1,7 @@
 # New Template
 
 ## ****Released on <t:1788443280:F> (<t:1788443280:R>)****
+
 ## **Categories: Templates**
 
 ## ****New Template****

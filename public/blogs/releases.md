@@ -1,6 +1,7 @@
 # Releases
 
 ## **Released on <t:1789845000:F> (<t:1789845000:R>)**
+
 ## **Categories: Releases, GeoWeather, SuperSMP Companion, Luma Store, Apps, Android**
 
 ## ****Releases****

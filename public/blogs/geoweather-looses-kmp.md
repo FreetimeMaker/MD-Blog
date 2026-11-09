@@ -1,6 +1,7 @@
 # GeoWeather loses KMP
 
 ## **Released on <t:1789629300:F> (<t:1789629300:R>)**
+
 ## **Categories: Releases, GeoWeather, Apps, Android, Linux, Windows**
 
 ## ****GeoWeather loses KMP****

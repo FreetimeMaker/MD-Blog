@@ -3,6 +3,7 @@
 ## ****Released on <t:1788443280:F> (<t:1788443280:R>)****
 
 ## Freetime Maker
+
 📧 **[FreetimeMaker@proton.me](mailto:FreetimeMaker@proton.me)**
 📍 **Switzerland**
 
@@ -16,7 +17,7 @@
 
 ### 🧠 ****Skills****
 
-#### ****Technical**** 
+#### ****Technical****
 
 - ****Backend:**** **Node.js, Express, Supabase**
 
