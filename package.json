@@ -7,20 +7,24 @@
   "name": "md-blog",
   "version": "1.0.0",
   "description": "Lightweight Blog Platform for Automatic Markdown Rendering",
-  "main": "core3.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "node --use-system-ca server.js",
+    "start": "node --use-system-ca server.js"
   },
-  "keywords": ["blog", "markdown", "static"],
+  "keywords": [
+    "blog",
+    "markdown",
+    "static"
+  ],
   "author": "Freetime Maker",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/FreetimeMaker/MD-Blog/issues"
   },
   "homepage": "https://github.com/FreetimeMaker/MD-Blog#readme",
   "dependencies": {
-    "marked": "^4.0.0",
-    "@vercel/node": "^2.15.10"
+    "marked": "^18.1.3",
+    "@vercel/node": "^30.0.0"
   }
 }

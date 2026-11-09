@@ -41,7 +41,9 @@ npm run dev
 npm start
 ```
 
-Both scripts currently start `server.js`. For local execution, make sure a compatible `server.js` is present or use the Vercel development environment for the API routes.
+Both scripts start the local server at `http://localhost:3000`. Use Node.js 24 or newer. Set `PORT` to change the port. Blog pages fetch posts and categories from `https://api.free-time.me/v2` and therefore require network access; set `ALL_API_URL` to use another API instance. The homepage and static assets are served locally.
+
+The start scripts enable `--use-system-ca`, so Node.js also trusts certificates from the operating system certificate store. This supports trusted corporate proxies or antivirus HTTPS inspection without disabling TLS verification. If `SELF_SIGNED_CERT_IN_CHAIN` persists, obtain the correct CA certificate from your administrator and configure `NODE_EXTRA_CA_CERTS` with its PEM file path before starting the server. Do not disable certificate verification.
 
 ## Adding a Blog Post
 
@@ -67,11 +69,11 @@ Posts without a level-one heading use a title generated from their filename.
 
 ## Routes
 
-| URL | Description |
-| --- | --- |
-| `/` | Renders the homepage from `public/md/index.md` |
-| `/blog` | Lists all Markdown files in `public/blogs` |
-| `/blog/<slug>` | Renders one blog post |
+| URL            | Description                                    |
+| -------------- | ---------------------------------------------- |
+| `/`            | Renders the homepage from `public/md/index.md` |
+| `/blog`        | Lists all Markdown files in `public/blogs`     |
+| `/blog/<slug>` | Renders one blog post                          |
 
 ## Deployment
 
