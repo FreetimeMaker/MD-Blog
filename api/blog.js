@@ -8,7 +8,9 @@ export const config = { runtime: "nodejs" };
 export default async function handler(req, res) {
   const { category } = req.query;
   const templatePath = path.join(process.cwd(), "public", "views", "blog.html");
-  const template = fs.readFileSync(templatePath, "utf-8");
+  const template = fs
+    .readFileSync(templatePath, "utf-8")
+    .replace(/{{backUrl}}/g, "https://blog.free-time.me");
 
   try {
     const [postsResponse, categoriesResponse] = await Promise.all([
@@ -86,7 +88,11 @@ export default async function handler(req, res) {
 
     const titleText =
       activeFilters.length > 0
-        ? `My Blogs: ${activeFilters.join(" + ")}`
+        ? `My Blogs: ${
+            activeFilters.length > 1
+              ? `${activeFilters.slice(0, -1).join(", ")} & ${activeFilters.at(-1)}`
+              : activeFilters[0]
+          }`
         : "My Blogs";
 
     const html = template

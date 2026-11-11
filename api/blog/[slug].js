@@ -16,7 +16,9 @@ function replaceDiscordTimestamps(markdown) {
 export default async function handler(req, res) {
   const { slug } = req.query;
   const templatePath = path.join(process.cwd(), "public", "views", "blog.html");
-  const template = fs.readFileSync(templatePath, "utf-8");
+  const template = fs
+    .readFileSync(templatePath, "utf-8")
+    .replace(/{{backUrl}}/g, "https://blog.free-time.me/blog");
 
   try {
     const response = await fetch(
