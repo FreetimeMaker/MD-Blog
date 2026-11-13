@@ -32,7 +32,13 @@ export const server = http.createServer(async (req, res) => {
     let body;
     let type = types[path.extname(filename)] || "application/octet-stream";
     try {
-      body = await readFile(filename);
+      try {
+        body = await readFile(filename);
+      } catch (error) {
+        if (error.code !== "EISDIR") throw error;
+        body = await readFile(path.join(filename, "index.html"));
+        type = "text/html";
+      }
     } catch (error) {
       if (!["ENOENT", "ENOTDIR", "EISDIR"].includes(error.code)) throw error;
       body = await readFile(path.join(root, "404.html"));
