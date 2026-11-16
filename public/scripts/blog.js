@@ -36,6 +36,7 @@ async function localRequest(path) {
     localPosts = (async () => {
       const response = await fetch("/data/local-posts.json", {
         credentials: "omit",
+        cache: "no-store",
         signal: AbortSignal.timeout(20000),
       });
       if (!response.ok)
@@ -99,6 +100,25 @@ function categoryLinks(categories) {
     box.append(link(category, filterUrl([category]), "category-tag"));
   return box;
 }
+function publicationTime(post) {
+  const release =
+    typeof post.markdown === "string"
+      ? post.markdown.match(/\bReleased on\s+<t:(\d+)(?::[tTdDfFR])?>/i)
+      : null;
+  const value = post.publishedAt;
+  const timestamp =
+    typeof value === "number"
+      ? value * 1000
+      : typeof value === "string"
+        ? Date.parse(value)
+        : release
+          ? Number(release[1]) * 1000
+          : NaN;
+  return Number.isFinite(timestamp) &&
+    Number.isFinite(new Date(timestamp).getTime())
+    ? timestamp
+    : -Infinity;
+}
 async function list() {
   const filters = (new URLSearchParams(location.search).get("category") || "")
     .split(",")
@@ -134,7 +154,13 @@ async function list() {
   }
   if (filters.length) cloud.append(link("Clear All", "/blog/"));
   const ul = element("ul");
-  for (const post of createPostRoutes(data.posts)) {
+  const posts = createPostRoutes(data.posts);
+  posts.sort((a, b) => {
+    const left = publicationTime(a);
+    const right = publicationTime(b);
+    return left === right ? 0 : left > right ? -1 : 1;
+  });
+  for (const post of posts) {
     if (!post || typeof post.slug !== "string") continue;
     const categories = strings(post.categories);
     if (

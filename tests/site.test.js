@@ -56,6 +56,52 @@ async function render(url, responses) {
   );
   return { document: dom.window.document, calls };
 }
+test("local fallback renders unsorted and older snapshot posts newest first", async () => {
+  const local = {
+    posts: [
+      {
+        slug: "old",
+        title: "Old",
+        categories: ["Apps"],
+        markdown: "Released on <t:100:F>",
+      },
+      {
+        slug: "undated",
+        title: "Undated",
+        categories: ["Apps"],
+        markdown: "No publication date",
+      },
+      {
+        slug: "new",
+        title: "New",
+        categories: ["Apps"],
+        markdown: "Released on <t:300:F>",
+      },
+      {
+        slug: "middle",
+        title: "Middle",
+        categories: ["Apps"],
+        publishedAt: 200,
+        markdown: "",
+      },
+    ],
+  };
+  for (const suffix of ["", "?category=Apps"]) {
+    const { document } = await render(
+      `https://blog.free-time.me/blog/${suffix}`,
+      {
+        "/data/local-posts.json": local,
+      },
+    );
+    assert.deepEqual(
+      [...document.querySelectorAll("#blog-content li > a")].map(
+        (a) => a.textContent,
+      ),
+      ["New", "Middle", "Old", "Undated"],
+    );
+  }
+});
+
 const posts = {
   posts: [
     {
