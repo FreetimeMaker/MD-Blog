@@ -1,6 +1,8 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { marked } from "marked";
 import { loadPostRoutes, postPath } from "./post-pages.js";
+import { loadLocalPosts } from "./local-posts.js";
+import { createPostRoutes } from "../public/scripts/post-routes.js";
 
 export function timestamps(markdown) {
   return markdown.replace(
@@ -18,9 +20,31 @@ const escape = (text) =>
       ],
   );
 // Fetch and validate before replacing the previous artifact; never deploy a partial slug list.
-const routes = await loadPostRoutes();
+const localPosts = await loadLocalPosts();
+const localRoutes = createPostRoutes(localPosts);
+let routes;
+try {
+  routes = await loadPostRoutes();
+} catch (error) {
+  console.warn(
+    "[build] API unavailable; using local blog posts:",
+    error.message,
+  );
+  routes = localRoutes;
+}
+// Include offline-only paths even when the API is available at build time.
+const pageRoutes = new Map();
+for (const post of [...localRoutes, ...routes]) {
+  for (const slug of new Set([post.route, post.slug]))
+    pageRoutes.set(slug, post);
+}
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist/blog", { recursive: true });
+await mkdir("dist/data", { recursive: true });
+await writeFile(
+  "dist/data/local-posts.json",
+  JSON.stringify({ posts: localPosts }),
+);
 for (const dir of ["styles", "favicons", "scripts"])
   await cp(`public/${dir}`, `dist/${dir}`, { recursive: true });
 await mkdir("dist/vendor", { recursive: true });
@@ -56,18 +80,16 @@ const shell = template
     '<script type="module" src="/scripts/blog.js"></script></body>',
   );
 await writeFile("dist/blog/index.html", shell);
-for (const post of routes) {
-  for (const slug of new Set([post.route, post.slug])) {
-    await mkdir(`dist/blog/${slug}`, { recursive: true });
-    const canonical = `https://blog.free-time.me${postPath(post.route)}`;
-    await writeFile(
-      `dist/blog/${slug}/index.html`,
-      shell.replace(
-        "</head>",
-        `<link rel="canonical" href="${escape(canonical)}" /></head>`,
-      ),
-    );
-  }
+for (const [slug, post] of pageRoutes) {
+  await mkdir(`dist/blog/${slug}`, { recursive: true });
+  const canonical = `https://blog.free-time.me${postPath(post.route)}`;
+  await writeFile(
+    `dist/blog/${slug}/index.html`,
+    shell.replace(
+      "</head>",
+      `<link rel="canonical" href="${escape(canonical)}" /></head>`,
+    ),
+  );
 }
 console.log(
   `Generated ${routes.length} canonical blog post paths plus legacy aliases from the API.`,

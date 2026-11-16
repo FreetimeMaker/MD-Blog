@@ -30,17 +30,68 @@ function filterUrl(filters) {
 }
 const strings = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
-async function request(path) {
-  const response = await fetch(`${API}${path}`, {
-    credentials: "omit",
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!response.ok) {
-    const error = new Error(`Blog API returned ${response.status}`);
-    error.status = response.status;
+let localPosts;
+async function localRequest(path) {
+  if (!localPosts) {
+    localPosts = (async () => {
+      const response = await fetch("/data/local-posts.json", {
+        credentials: "omit",
+        signal: AbortSignal.timeout(20000),
+      });
+      if (!response.ok)
+        throw new Error(`Local blogs returned ${response.status}`);
+      const data = await response.json();
+      createPostRoutes(data.posts);
+      return data.posts;
+    })();
+  }
+  const posts = await localPosts;
+  if (path === "/blog/posts") return { posts };
+  if (path === "/blog/categories") {
+    return {
+      categories: [
+        ...new Set(posts.flatMap((post) => strings(post.categories))),
+      ].sort(),
+    };
+  }
+  const slug = decodeURIComponent(path.slice("/blog/posts/".length));
+  const post = posts.find((post) => post.slug === slug);
+  if (!post) {
+    const error = new Error("Local post not found");
+    error.status = 404;
     throw error;
   }
-  return response.json();
+  return post;
+}
+async function request(path) {
+  try {
+    const response = await fetch(`${API}${path}`, {
+      credentials: "omit",
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) {
+      const error = new Error(`Blog API returned ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    const data = await response.json();
+    if (path === "/blog/posts") createPostRoutes(data.posts);
+    else if (path === "/blog/categories") {
+      if (!Array.isArray(data.categories))
+        throw new Error("Invalid categories response");
+    } else if (typeof data.markdown !== "string")
+      throw new Error("Invalid post response");
+    return data;
+  } catch (error) {
+    console.error("[blog] API request failed; trying local Markdown:", error);
+    try {
+      return await localRequest(path);
+    } catch (localError) {
+      // Preserve a genuine API 404 if no local copy exists either.
+      if (error.status === 404) throw error;
+      throw localError;
+    }
+  }
 }
 function categoryLinks(categories) {
   const box = element("div", undefined, "categories-container");

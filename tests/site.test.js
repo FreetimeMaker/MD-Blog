@@ -2,7 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { loadPostSlugs, postPath } from "../scripts/post-pages.js";
-import { createPostRoutes, postPath as sharedPostPath, slugify } from "../public/scripts/post-routes.js";
+import {
+  createPostRoutes,
+  postPath as sharedPostPath,
+  slugify,
+} from "../public/scripts/post-routes.js";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import createDOMPurify from "dompurify";
@@ -18,7 +22,7 @@ async function render(url, responses) {
   const request = async (url, options) => {
     assert.equal(options.credentials, "omit");
     calls.push(url);
-    const value = responses[url.split("/v2")[1]];
+    const value = responses[url.startsWith("/") ? url : url.split("/v2")[1]];
     return {
       ok: !!value && !value.status,
       status: value?.status || 200,
@@ -33,7 +37,9 @@ async function render(url, responses) {
     "DOMPurify",
     "updateDiscordTimestamps",
     "console",
-    "createPostRoutes", "postPath", "history",
+    "createPostRoutes",
+    "postPath",
+    "history",
     source,
   );
   await execute(
@@ -44,7 +50,9 @@ async function render(url, responses) {
     createDOMPurify(dom.window),
     () => {},
     { error() {} },
-    createPostRoutes, sharedPostPath, dom.window.history,
+    createPostRoutes,
+    sharedPostPath,
+    dom.window.history,
   );
   return { document: dom.window.document, calls };
 }
@@ -67,7 +75,12 @@ test("build slug discovery validates API failures, shape and portable paths", as
   };
   assert.deepEqual(
     await loadPostSlugs(
-      mock({ posts: [{ slug: "xmrigui", title: "XMRiGUI Update V2.0.0" }, { slug: "hello world", title: "Hello" }] }),
+      mock({
+        posts: [
+          { slug: "xmrigui", title: "XMRiGUI Update V2.0.0" },
+          { slug: "hello world", title: "Hello" },
+        ],
+      }),
     ),
     ["xmrigui", "hello world"],
   );
@@ -106,6 +119,60 @@ test("build slug discovery validates API failures, shape and portable paths", as
     /Invalid JSON/,
   );
 });
+test("API failure falls back to local Markdown for filtered lists and post routes", async () => {
+  const local = {
+    posts: [
+      {
+        slug: "offline",
+        title: "Offline post",
+        categories: ["Apps"],
+        markdown: "# Offline post\n**Local content**",
+      },
+    ],
+  };
+  const responses = { "/data/local-posts.json": local };
+  const list = await render(
+    "https://blog.free-time.me/blog/?category=Apps",
+    responses,
+  );
+  assert.equal(list.document.querySelector("li a").textContent, "Offline post");
+  assert.ok(list.document.querySelector(".category-tag.active"));
+  for (const path of ["/blog/offline-post/", "/blog/offline/"]) {
+    const post = await render(`https://blog.free-time.me${path}`, responses);
+    assert.equal(post.document.title, "Offline post");
+    assert.equal(
+      post.document.querySelector("#blog-content strong").textContent,
+      "Local content",
+    );
+    assert.equal(
+      post.calls.filter((url) => url === "/data/local-posts.json").length,
+      1,
+    );
+  }
+});
+
+test("local Markdown discovery includes nested files and category metadata", async () => {
+  const { loadLocalPosts } = await import("../scripts/local-posts.js");
+  const { mkdtemp, mkdir, writeFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const root = await mkdtemp(path.join(tmpdir(), "md-blog-"));
+  try {
+    await mkdir(path.join(root, "nested"));
+    await writeFile(
+      path.join(root, "nested", "example.md"),
+      "# Example\n## **Categories: Apps, Android**\n**Bold**",
+    );
+    const posts = await loadLocalPosts(root);
+    assert.equal(posts[0].slug, "example");
+    assert.equal(posts[0].title, "Example");
+    assert.deepEqual(posts[0].categories, ["Apps", "Android"]);
+    assert.match(posts[0].markdown, /\*\*Bold\*\*/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("list uses safe metadata, encoded slugs and comma/ampersand title", async () => {
   const { document: d } = await render(
     "https://blog.free-time.me/blog/?category=A,B,C",
@@ -113,7 +180,10 @@ test("list uses safe metadata, encoded slugs and comma/ampersand title", async (
   );
   assert.equal(d.title, "My Blogs: A, B & C");
   assert.equal(d.querySelector("li a").textContent, posts.posts[0].title);
-  assert.equal(d.querySelector("li a").getAttribute("href"), sharedPostPath(slugify(posts.posts[0].title)));
+  assert.equal(
+    d.querySelector("li a").getAttribute("href"),
+    sharedPostPath(slugify(posts.posts[0].title)),
+  );
   assert.equal(
     d.querySelector("#blog-content img, #blog-content script"),
     null,
@@ -178,7 +248,8 @@ test("a post published after the build renders via the fallback with a clean can
     d.querySelector('link[rel="canonical"]').href,
     "https://blog.free-time.me/blog/not-built-yet/",
   );
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 3);
+  assert.ok(calls.includes("/data/local-posts.json"));
 });
 test("empty filters, unavailable API, missing post and unknown routes", async () => {
   const empty = await render(
@@ -227,7 +298,9 @@ test("static artifact and preview HTTP routing", async () => {
       const html = new JSDOM(await page.text());
       assert.equal(
         html.window.document.querySelector('link[rel="canonical"]').href,
-        new JSDOM(await readFile(`dist/blog/${entry.name}/index.html`, "utf8")).window.document.querySelector("link[rel=canonical]").href,
+        new JSDOM(
+          await readFile(`dist/blog/${entry.name}/index.html`, "utf8"),
+        ).window.document.querySelector("link[rel=canonical]").href,
       );
       assert.equal((await fetch(origin + route.slice(0, -1))).status, 200);
       html.window.close();
@@ -286,28 +359,48 @@ test("theme persistence and all timestamp styles including invalid dates", async
 test("title routes normalize versions and reject ambiguous or unsafe paths", () => {
   assert.equal(slugify("XMRiGUI Update V2.0.0"), "xmrigui-update-v2-0-0");
   assert.equal(slugify("Änderung: V2.10.3!"), "anderung-v2-10-3");
-  const route = createPostRoutes([{ slug: "xmrigui", title: "XMRiGUI Update V2.0.0" }])[0];
+  const route = createPostRoutes([
+    { slug: "xmrigui", title: "XMRiGUI Update V2.0.0" },
+  ])[0];
   assert.equal(postPath(route.route), "/blog/xmrigui-update-v2-0-0/");
   for (const entries of [
-    [{ slug: "one", title: "Same!" }, { slug: "two", title: "Same?" }],
-    [{ slug: "one", title: "two" }, { slug: "two", title: "Other" }],
+    [
+      { slug: "one", title: "Same!" },
+      { slug: "two", title: "Same?" },
+    ],
+    [
+      { slug: "one", title: "two" },
+      { slug: "two", title: "Other" },
+    ],
     [{ slug: "../escape", title: "Safe title" }],
     [{ slug: "CON", title: "Safe title" }],
     [{ slug: "safe", title: "..." }],
-  ]) assert.throws(() => createPostRoutes(entries));
+  ])
+    assert.throws(() => createPostRoutes(entries));
 });
 
 test("title URL resolves API slug and legacy URLs replace address and canonical", async () => {
   const title = "XMRiGUI Update V2.0.0";
-  for (const path of ["/blog/xmrigui-update-v2-0-0/", "/blog/xmrigui/", "/blog/?post=xmrigui", "/api/blog/xmrigui"]) {
-    const { document: d, calls } = await render(`https://blog.free-time.me${path}`, {
-      "/blog/posts": { posts: [{ slug: "xmrigui", title }] },
-      "/blog/posts/xmrigui": { title, markdown: "Update", categories: [] },
-    });
+  for (const path of [
+    "/blog/xmrigui-update-v2-0-0/",
+    "/blog/xmrigui/",
+    "/blog/?post=xmrigui",
+    "/api/blog/xmrigui",
+  ]) {
+    const { document: d, calls } = await render(
+      `https://blog.free-time.me${path}`,
+      {
+        "/blog/posts": { posts: [{ slug: "xmrigui", title }] },
+        "/blog/posts/xmrigui": { title, markdown: "Update", categories: [] },
+      },
+    );
     assert.equal(d.title, title);
     assert.equal(new URL(d.URL).pathname, "/blog/xmrigui-update-v2-0-0/");
     assert.equal(new URL(d.URL).search, "");
-    assert.equal(d.querySelector("link[rel=canonical]").href, "https://blog.free-time.me/blog/xmrigui-update-v2-0-0/");
+    assert.equal(
+      d.querySelector("link[rel=canonical]").href,
+      "https://blog.free-time.me/blog/xmrigui-update-v2-0-0/",
+    );
     assert.ok(calls.includes("https://api.free-time.me/v2/blog/posts/xmrigui"));
   }
 });
