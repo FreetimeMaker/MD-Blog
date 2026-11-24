@@ -30,6 +30,11 @@ function filterUrl(filters) {
 }
 const strings = (value) =>
   Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+const tagOrder = new Intl.Collator("en", {
+  sensitivity: "base",
+  numeric: true,
+});
+const sortedTags = (value) => strings(value).sort(tagOrder.compare);
 let localPosts;
 async function localRequest(path) {
   if (!localPosts) {
@@ -96,7 +101,7 @@ async function request(path) {
 }
 function categoryLinks(categories) {
   const box = element("div", undefined, "categories-container");
-  for (const category of categories)
+  for (const category of sortedTags(categories))
     box.append(link(category, filterUrl([category]), "category-tag"));
   return box;
 }
@@ -137,7 +142,7 @@ async function list() {
     throw new Error("Invalid API response");
   const cloud = element("div", undefined, "categories-container");
   cloud.append(element("strong", "Filter by:"));
-  for (const category of strings(categoryData.categories)) {
+  for (const category of sortedTags(categoryData.categories)) {
     const active = filters.some(
       (f) => f.toLowerCase() === category.toLowerCase(),
     );
@@ -162,7 +167,7 @@ async function list() {
   });
   for (const post of posts) {
     if (!post || typeof post.slug !== "string") continue;
-    const categories = strings(post.categories);
+    const categories = sortedTags(post.categories);
     if (
       !filters.every((f) =>
         categories.some((c) => c.toLowerCase() === f.toLowerCase()),
