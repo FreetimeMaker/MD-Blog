@@ -308,7 +308,7 @@ footer {
     width: 32px;
     height: 32px;
     flex: 0 0 32px;
-    background: url("/favicons/apple-touch.icon.png") center / contain no-repeat;
+    background: url("/favicons/apple-touch-icon.png") center / contain no-repeat;
 }
 
 .navigate-btn:active,

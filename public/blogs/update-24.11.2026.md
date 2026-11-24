@@ -2,7 +2,7 @@
 
 ## **Released on <t:1795524468:F> (<t:1795524468:R>)**
 
-## **Categories: Releases, GeoWeather, Blog, Apps, Android, Websites, License Generator, Freetime Core, F-droid**
+## **Categories: Releases, GeoWeather, Blog, Apps, Android, Websites, License Generator, Freetime Core, F-Droid**
 
 ## ****Update from the 24.11.2026****
 
