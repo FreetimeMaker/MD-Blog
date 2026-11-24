@@ -26,7 +26,7 @@
   "homepage": "https://github.com/FreetimeMaker/MD-Blog#readme",
   "dependencies": {
     "dompurify": "^3.5.0",
-    "marked": "^18.2.1"
+    "marked": "^18.3.0"
   },
   "devDependencies": {
     "jsdom": "^31.0.1"
